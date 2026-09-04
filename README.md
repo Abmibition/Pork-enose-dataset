@@ -7,7 +7,9 @@ Every number in these files is a real measurement or a value computed from real
 measurements at acquisition time. Nothing is simulated or augmented.
 
 Section 3 documents the label definition and the baseline conventions — worth
-reading before the derived columns are used in an evaluation.
+reading before the derived columns are used in an evaluation. The
+[docs/](docs/) directory covers the same ground in more depth: acquisition
+protocol, per-column reference, label provenance and baseline conventions.
 
 ---
 
