@@ -1,8 +1,7 @@
 # Pork Freshness Electronic-Nose Dataset (RISC-V, 4-class)
 
 Raw time-series recordings from a custom RISC-V electronic nose measuring pork
-headspace at two ambient temperature ranges. 74 recordings, 5 908 frames,
-four freshness classes.
+headspace. 37 recordings, 2 894 frames, four freshness classes.
 
 Every number in these files is a real measurement or a value computed from real
 measurements at acquisition time. Nothing is simulated or augmented.
@@ -29,42 +28,27 @@ frames per recording.
 
 ```
 data/
-├── nominal_24-28C/   37 recordings, 2 894 frames, 23.3–27.8 °C
-└── shifted_20C/      37 recordings, 3 014 frames, 19.5–20.4 °C
+└── nominal_24-28C/   37 recordings, 2 894 frames, 23.3–27.8 °C
 ```
-
-### Subset comparison
-
-|                            | `nominal_24-28C`                                             | `shifted_20C`                  |
-| -------------------------- | ------------------------------------------------------------ | ------------------------------ |
-| Recordings                 | 37                                                           | 37                             |
-| Frames                     | 2 894                                                        | 3 014                          |
-| Ambient temperature        | 23.3–27.8 °C                                                 | 19.5–20.4 °C                   |
-| `note` column              | populated (baseline source, steady-state values, label history) | empty                          |
-| Numeric precision          | full float                                                   | **rounded to 3 decimals**      |
-| Baseline for delta columns | one constant per file, shared across files                   | **one baseline per recording** |
-| Labels per file            | may vary within a file                                       | exactly one per file           |
 
 ### Class distribution (frames)
 
-| Class            | `nominal_24-28C` | `shifted_20C` | Total |
-| ---------------- | ---------------- | ------------- | ----- |
-| `air`            | 506              | 751           | 1 257 |
-| `fresh`          | 824              | 558           | 1 382 |
-| `early_spoilage` | 893              | 727           | 1 620 |
-| `spoiled`        | 671              | 978           | 1 649 |
+| Class            | Frames |
+| ---------------- | ------ |
+| `air`            | 506    |
+| `fresh`          | 824    |
+| `early_spoilage` | 893    |
+| `spoiled`        | 671    |
 
 `air` frames are ambient-air recordings with no meat present — device zero
 reference, not a freshness grade.
 
 ### File naming
 
-- `dynamic_exp_<YYYYMMDD>_<replicate>_t<hours>h.csv` — meat exposure, nominal set.
+- `dynamic_exp_<YYYYMMDD>_<replicate>_t<hours>h.csv` — meat exposure.
   `t1p` / `t6p` / `t15p` in the 8 May files are elapsed-time tags in the original
   notation, not percentages.
 - `dynamic_air_*.csv`, `dynamic_exp_*_air.csv` — dedicated ambient-air baselines.
-- `pork20C_G<NN>_t<H>p<HH>h.csv` — 20 °C set; `G01`–`G37` are recording indices,
-  `t12p58h` means 12.58 h of room-temperature ageing.
 
 The filename hour tag is the *ageing time of the meat*, not the class. Several
 recordings taken at a nonzero ageing time carry the `air` label because their
@@ -93,7 +77,7 @@ characterise the *direction* of errors — in this application, confusing `spoil
 for `fresh` and the reverse are not equivalent. The thresholds are anchored to
 colourimetric TVB-N measurements.
 
-### (2) The derived columns use different baselines in the two subsets
+### (2) The derived columns use more than one baseline convention
 
 Both are relative-to-baseline quantities:
 
@@ -102,47 +86,37 @@ nh3_delta    = nh3_ppm - baseline_nh3
 gas_drop_pct = (baseline_gas - gas_resistance) / baseline_gas * 100
 ```
 
-The baseline convention differs by subset, and within the nominal subset:
+The baseline convention differs within the dataset:
 
-| Subset                      | Baseline source                          | Implied `baseline_gas`                   |
-| --------------------------- | ---------------------------------------- | ---------------------------------------- |
-| `nominal_24-28C`, 28 files  | global mean over all air recordings      | 108 188 Ω, one shared value              |
-| `nominal_24-28C`, 9 files   | paired air recording of the same session | 7 distinct values, 65 636 – 145 315 Ω    |
-| `shifted_20C`, all 37 files | that recording's own baseline            | different per file, ≈ 90 000 – 121 900 Ω |
+| Files    | Baseline source                          | Implied `baseline_gas`                |
+| -------- | ---------------------------------------- | ------------------------------------- |
+| 28 files | global mean over all air recordings      | 108 188 Ω, one shared value           |
+| 9 files  | paired air recording of the same session | 7 distinct values, 65 636 – 145 315 Ω |
 
-The nominal subset therefore carries eight baselines and the 20 °C subset
-thirty-seven. `gas_drop_pct` spans −24.3 % to 99.3 % in the nominal subset (it
-turns negative where gas resistance exceeds the global air baseline) and 0.0 % to
-99.1 % in the 20 °C subset. Pooling the derived columns across subsets, or across
-sessions inside the nominal subset, calls for recomputing them under a single
-convention first. The raw columns — `nh3_ppm`, `h2s_ppm`, `gas_resistance`,
+The dataset therefore carries eight baselines. `gas_drop_pct` spans −24.3 % to
+99.3 % (it turns negative where gas resistance exceeds the global air baseline).
+Pooling the derived columns across sessions calls for recomputing them under a
+single convention first. The raw columns — `nh3_ppm`, `h2s_ppm`, `gas_resistance`,
 `temperature`, `humidity`, `pressure` — are direct readings and are comparable
 throughout.
 
-Which baseline each nominal file used is recorded in its own `note` column, and
+Which baseline each file used is recorded in its own `note` column, and
 `scripts/summarize.py` recovers every baseline independently by inversion, so the
 two can be checked against each other. `gas_drop_pct` is one of the model input
 features used in our own work rather than a diagnostic column, which is why the
 convention is documented in this much detail. 
 
-### (3) Numeric precision differs between subsets
-
-Nominal-set derived columns carry full float precision
-(`41.41029616633554`); 20 °C-set columns are stored to three decimals
-(`1.055`). Recompute the derived columns from the raw readings if uniform
-precision is needed.
-
 ## 4. Columns
 
-21 columns in `nominal_24-28C`, 20 in `shifted_20C` (no `timestamp`).
+Each CSV has 21 columns.
 
 | Column                    | Unit  | Source                                                  |
 | ------------------------- | ----- | ------------------------------------------------------- |
-| `timestamp`               | —     | host clock, nominal subset only                         |
+| `timestamp`               | —     | host clock                                              |
 | `sample_id`               | —     | recording identifier                                    |
 | `elapsed_s`               | s     | time since recording start                              |
 | `time_label`              | —     | class label, **derived from NH₃** (see above)           |
-| `sensory_label`           | —     | sensory annotation slot; `none` throughout both subsets |
+| `sensory_label`           | —     | sensory annotation slot; `none` throughout |
 | `nh3_ppm`                 | ppm   | ZE03-NH₃, direct reading                                |
 | `h2s_ppm`                 | ppm   | ZE03-H₂S, direct reading                                |
 | `temperature`             | °C    | BME680                                                  |
@@ -151,7 +125,7 @@ precision is needed.
 | `gas_resistance`          | Ω     | BME680 VOC channel                                      |
 | `s_nh3`, `s_h2s`, `s_bme` | count | on-device spike counts, **before** lateral inhibition   |
 | `i_nh3`, `i_h2s`, `i_bme` | count | on-device spike counts, **after** lateral inhibition    |
-| `note`                    | —     | provenance string, nominal subset only                  |
+| `note`                    | —     | provenance string                                       |
 | `nh3_delta`, `h2s_delta`  | ppm   | derived, baseline-subtracted                            |
 | `gas_drop_pct`            | %     | derived, baseline-relative                              |
 

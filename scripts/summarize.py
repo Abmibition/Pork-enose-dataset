@@ -12,7 +12,7 @@ import sys
 from collections import Counter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SUBSETS = ["nominal_24-28C", "shifted_20C"]
+SUBSETS = ["nominal_24-28C"]
 CLASSES = ["air", "fresh", "early_spoilage", "spoiled"]
 
 
