@@ -68,7 +68,7 @@ reference, not a freshness grade.
 
 The filename hour tag is the *ageing time of the meat*, not the class. Several
 recordings taken at a nonzero ageing time carry the `air` label because their
-steady-state ammonia stayed at ambient level (see [labels.md](docs/labels.md)).
+steady-state ammonia stayed at ambient level (see section 3).
 
 ## 3. Notes for reuse
 
@@ -91,8 +91,7 @@ designed around that: hold out whole recordings (leave-one-recording-out),
 report results on ammonia-free feature subsets alongside the full set, and
 characterise the *direction* of errors — in this application, confusing `spoiled`
 for `fresh` and the reverse are not equivalent. The thresholds are anchored to
-colourimetric TVB-N measurements; [labels.md](docs/labels.md) gives the
-calibration points and the label revision history.
+colourimetric TVB-N measurements.
 
 ### (2) The derived columns use different baselines in the two subsets
 
@@ -158,7 +157,7 @@ precision is needed.
 
 The `s_*` / `i_*` columns are logged by the firmware's rate-based spike encoder
 and its lateral-inhibition stage. They are retained for transparency; our own
-deployed model does not consume them. Details in [columns.md](docs/columns.md).
+deployed model does not consume them.
 
 ## 5. Reproducing the summary tables
 
@@ -176,6 +175,5 @@ adapt with attribution.
 
 A manuscript describing the measurement system and its evaluation is in
 preparation; this section will be updated with the citation when it appears.
-Until then please cite the dataset itself via [CITATION.cff](CITATION.cff).
 
 Corrections and questions: please open an issue.
